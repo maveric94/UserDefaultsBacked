@@ -32,7 +32,7 @@ final class UserDefaultsBackedTests: XCTestCase {
         let defaults = UserDefaults.standard
 
         defaults.dictionaryRepresentation().keys.forEach {
-            defaults.set(nil, forKey: $0)
+            defaults.removeObject(forKey: $0)
         }
     }
     

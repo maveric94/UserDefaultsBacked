@@ -19,9 +19,8 @@ public struct PrimitiveUserDefaultsBacked<Value: PrimitiveUserDefaultsValue>: Us
             return value ?? defaultValue
         }
         set {
-            // hack for cases when Value is Optional and we are setting nil
-            if let value = newValue as? Optional<Any> {
-                storage.set(value, forKey: key)
+            if let optional = newValue as? AnyOptional, optional.isNil {
+                storage.removeObject(forKey: key)
             } else {
                 storage.set(newValue, forKey: key)
             }
@@ -72,3 +71,13 @@ extension Array: PrimitiveUserDefaultsValue where Element: PrimitiveUserDefaults
 extension Dictionary: PrimitiveUserDefaultsValue where Key == String, Value: PrimitiveUserDefaultsValue {
 }
 
+extension URL: PrimitiveUserDefaultsValue {
+}
+
+private protocol AnyOptional {
+    var isNil: Bool { get }
+}
+
+extension Optional: AnyOptional {
+    var isNil: Bool { self == nil }
+}
