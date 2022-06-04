@@ -7,38 +7,17 @@
 
 import Foundation
 
+
 @propertyWrapper
-public struct UserDefaultsBacked<Value: UserDefaultsConvertible> {
+public struct UserDefaultsBacked<Value: UserDefaultsConvertible>: UserDefaultsBackedWrapper {
     public var wrappedValue: Value {
-        get {
-            guard let value = storage.object(forKey: key) as? Value.UserDefaultsCompatibleType else {
-                return defaultValue
-            }
-            
-            do {
-                return try Value.init(userDefaultsCompatibleValue: value)
-            } catch {
-                assertionFailure(error.localizedDescription)
-                return defaultValue
-            }
-        }
-        set {
-            if let optional = newValue as? AnyOptional, optional.isNil {
-                storage.removeObject(forKey: key)
-            } else {
-                do {
-                    let converted = try newValue.toUserDefaultsCompatibleValue()
-                    storage.set(converted, forKey: key)
-                } catch {
-                    assertionFailure(error.localizedDescription)
-                }
-            }
-        }
+        get { _wrappedValue }
+        nonmutating set { _wrappedValue = newValue }
     }
 
-    private let key: String
-    private let defaultValue: Value
-    private let storage: UserDefaults
+    public let key: String
+    public let defaultValue: Value
+    public let storage: UserDefaults
     
     public init(wrappedValue defaultValue: Value,
                 key: String,
@@ -48,18 +27,3 @@ public struct UserDefaultsBacked<Value: UserDefaultsConvertible> {
         self.storage = storage
     }
 }
-
-
-extension UserDefaultsBacked where Value: ExpressibleByNilLiteral {
-    public init(key: String, storage: UserDefaults = .standard) {
-        self.init(wrappedValue: nil, key: key, storage: storage)
-    }
-}
-
-extension UserDefaultsBacked {
-    public init(wrappedValue defaultValue: Value, key: String) {
-        self.init(wrappedValue: defaultValue, key: key, storage: .standard)
-    }
-}
-
-
