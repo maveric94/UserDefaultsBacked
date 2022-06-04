@@ -1,27 +1,29 @@
 # UserDefaultsBacked
 
 ## Desription
-Property wrappers that use UserDefaults to persist values.
+Property wrapper that uses UserDefaults to persist values of different types.
 
 ## Usage
 ```Swift
 import UserDefaultsBacked
 
-struct Foo: Codable {
+struct Foo: Codable, UserDefaultsConvertible {
   var value: Int
 }
 
-class Bar {
-  @PrimitiveUserDefaultsBacked(key: "someKey")
-  var value: Int = 1
-  
-  @CodableUserDefaultsBacked(key: "anotherKey")
-  var value2: Foo?
+enum Bar: Int, UserDefaultsConvertible {
+  typealias UserDefaultsCompatibleType = RawValue
+  case a, b
 }
 
-let baz = Bar()
-baz.value = 2
-baz.value2 = Foo(value: 3)
+@UserDefaultsBacked(key: "someKey")
+var intValue: Int = 1
+  
+@UserDefaultsBacked(key: "anotherKey")
+var codableValue: Foo?
+
+@UserDefaultsBacked(key: "oneMoreKey")
+var enumValue: Bar?
 
 ```
 
