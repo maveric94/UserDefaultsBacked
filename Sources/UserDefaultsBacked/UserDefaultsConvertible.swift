@@ -9,21 +9,21 @@ import Foundation
 
 
 public protocol UserDefaultsConvertible {
-    associatedtype UnderlyingValue: UserDefaultsCompatible
+    associatedtype UserDefaultsCompatibleType: UserDefaultsCompatible
     
-    init(value: UnderlyingValue) throws
-    func convert() throws -> UnderlyingValue
+    init(userDefaultsCompatibleValue: UserDefaultsCompatibleType) throws
+    func toUserDefaultsCompatibleValue() throws -> UserDefaultsCompatibleType
 }
 
 public protocol UserDefaultsCompatible: UserDefaultsConvertible {
 }
 
 extension UserDefaultsCompatible {
-    public init(value: Self) throws {
-        self = value
+    public init(userDefaultsCompatibleValue: Self) throws {
+        self = userDefaultsCompatibleValue
     }
     
-    public func convert() throws -> Self {
+    public func toUserDefaultsCompatibleValue() throws -> Self {
         self
     }
 }
@@ -50,49 +50,49 @@ extension Data: UserDefaultsCompatible {
 }
 
 extension Array: UserDefaultsCompatible, UserDefaultsConvertible where Element: UserDefaultsCompatible {
-    public typealias UnderlyingValue = Self
+    public typealias UserDefaultsCompatibleType = Self
 }
 
 extension Dictionary: UserDefaultsCompatible, UserDefaultsConvertible where Key == String, Value: UserDefaultsCompatible {
-    public typealias UnderlyingValue = Self
+    public typealias UserDefaultsCompatibleType = Self
 }
 
 extension URL: UserDefaultsCompatible {
 }
 
 extension Optional: UserDefaultsCompatible, UserDefaultsConvertible where Wrapped: UserDefaultsConvertible {
-    public typealias UnderlyingValue = Wrapped.UnderlyingValue?
+    public typealias UserDefaultsCompatibleType = Wrapped.UserDefaultsCompatibleType?
     
-    public init(value: UnderlyingValue) throws {
-        self = try value.map { try Wrapped.init(value: $0) }
+    public init(userDefaultsCompatibleValue: UserDefaultsCompatibleType) throws {
+        self = try userDefaultsCompatibleValue.map { try Wrapped.init(userDefaultsCompatibleValue: $0) }
     }
     
-    public func convert() throws -> UnderlyingValue {
-        try self.map { try $0.convert() }
+    public func toUserDefaultsCompatibleValue() throws -> UserDefaultsCompatibleType {
+        try self.map { try $0.toUserDefaultsCompatibleValue() }
     }
 }
 
 extension UserDefaultsConvertible where Self: Codable {
-    public init(value: Data) throws {
-        self = try JSONDecoder().decode(Self.self, from: value)
+    public init(userDefaultsCompatibleValue: Data) throws {
+        self = try JSONDecoder().decode(Self.self, from: userDefaultsCompatibleValue)
     }
 
-    public func convert() throws -> Data {
+    public func toUserDefaultsCompatibleValue() throws -> Data {
         try JSONEncoder().encode(self)
     }
 }
 
 extension UserDefaultsConvertible where Self: RawRepresentable, RawValue: UserDefaultsConvertible {
-    public init(value: RawValue.UnderlyingValue) throws {
-        let raw = try Self.RawValue.init(value: value)
+    public init(userDefaultsCompatibleValue: RawValue.UserDefaultsCompatibleType) throws {
+        let raw = try Self.RawValue.init(userDefaultsCompatibleValue: userDefaultsCompatibleValue)
         guard let value = Self.init(rawValue: raw) else {
-            throw Error.incompatibleValue(value, type: Self.self)
+            throw Error.incompatibleValue(userDefaultsCompatibleValue, type: Self.self)
         }
         self = value
     }
 
-    public func convert() throws -> RawValue.UnderlyingValue {
-        try rawValue.convert()
+    public func toUserDefaultsCompatibleValue() throws -> RawValue.UserDefaultsCompatibleType {
+        try rawValue.toUserDefaultsCompatibleValue()
     }
 }
 

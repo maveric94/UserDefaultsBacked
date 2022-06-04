@@ -11,12 +11,12 @@ import Foundation
 public struct UserDefaultsBacked<Value: UserDefaultsConvertible> {
     public var wrappedValue: Value {
         get {
-            guard let value = storage.object(forKey: key) as? Value.UnderlyingValue else {
+            guard let value = storage.object(forKey: key) as? Value.UserDefaultsCompatibleType else {
                 return defaultValue
             }
             
             do {
-                return try Value.init(value: value)
+                return try Value.init(userDefaultsCompatibleValue: value)
             } catch {
                 assertionFailure(error.localizedDescription)
                 return defaultValue
@@ -27,7 +27,7 @@ public struct UserDefaultsBacked<Value: UserDefaultsConvertible> {
                 storage.removeObject(forKey: key)
             } else {
                 do {
-                    let converted = try newValue.convert()
+                    let converted = try newValue.toUserDefaultsCompatibleValue()
                     storage.set(converted, forKey: key)
                 } catch {
                     assertionFailure(error.localizedDescription)

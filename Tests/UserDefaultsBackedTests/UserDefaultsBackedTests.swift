@@ -35,9 +35,9 @@ final class UserDefaultsBackedTests: XCTestCase {
     struct CodableTest: Codable, Equatable, UserDefaultsConvertible {
         var a = 0
     }
-    
+        
     enum EnumTest: Int, UserDefaultsConvertible {
-        typealias UnderlyingValue = RawValue
+        typealias UserDefaultsCompatibleType = RawValue
         case a, b
     }
     
@@ -108,3 +108,4 @@ final class UserDefaultsBackedTests: XCTestCase {
         XCTAssertEqual(value10, nil)
     }
 }
+
