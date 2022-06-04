@@ -2,29 +2,44 @@ import XCTest
 @testable import UserDefaultsBacked
 
 final class UserDefaultsBackedTests: XCTestCase {
-    @PrimitiveUserDefaultsBacked(key: "1")
+    @UserDefaultsBacked(key: "1")
     var value1: [String] = []
     
-    @PrimitiveUserDefaultsBacked(key: "2")
+    @UserDefaultsBacked(key: "2")
     var value2: [String]?
     
-    @PrimitiveUserDefaultsBacked(key: "3")
+    @UserDefaultsBacked(key: "3")
     var value3: String = ""
     
-    @PrimitiveUserDefaultsBacked(key: "4")
+    @UserDefaultsBacked(key: "4")
     var value4: String?
     
-    @PrimitiveUserDefaultsBacked(key: "5")
+    @UserDefaultsBacked(key: "5")
     var value5: [String: Int] = [:]
-    
-    @PrimitiveUserDefaultsBacked(key: "6")
+
+    @UserDefaultsBacked(key: "6")
     var value6: [String: Int]?
     
-    @CodableUserDefaultsBacked(key: "7")
-    var value7: String = ""
+    @UserDefaultsBacked(key: "7")
+    var value7: CodableTest = .init()
     
-    @CodableUserDefaultsBacked(key: "8")
-    var value8: String?
+    @UserDefaultsBacked(key: "8")
+    var value8: CodableTest?
+    
+    @UserDefaultsBacked(key: "9")
+    var value9: EnumTest = .a
+    
+    @UserDefaultsBacked(key: "10")
+    var value10: EnumTest?
+        
+    struct CodableTest: Codable, Equatable, UserDefaultsConvertible {
+        var a = 0
+    }
+    
+    enum EnumTest: Int, UserDefaultsConvertible {
+        typealias UnderlyingValue = RawValue
+        case a, b
+    }
     
     override class func setUp() {
         super.setUp()
@@ -63,21 +78,33 @@ final class UserDefaultsBackedTests: XCTestCase {
         XCTAssertEqual(value5, [:])
         value5 = dict
         XCTAssertEqual(value5, dict)
-        
+
         XCTAssertEqual(value6, nil)
         value6 = dict
         XCTAssertEqual(value6, dict)
         value6 = nil
         XCTAssertEqual(value6, nil)
         
-        XCTAssertEqual(value7, "")
-        value7 = string
-        XCTAssertEqual(value7, string)
+        let str = CodableTest(a: 4)
+        XCTAssertEqual(value7, .init())
+        value7 = str
+        XCTAssertEqual(value7, str)
         
         XCTAssertEqual(value8, nil)
-        value8 = string
-        XCTAssertEqual(value8, string)
+        value8 = str
+        XCTAssertEqual(value8, str)
         value8 = nil
         XCTAssertEqual(value8, nil)
+        
+        let en: EnumTest = .b
+        XCTAssertEqual(value9, .a)
+        value9 = en
+        XCTAssertEqual(value9, en)
+        
+        XCTAssertEqual(value10, nil)
+        value10 = en
+        XCTAssertEqual(value10, en)
+        value10 = nil
+        XCTAssertEqual(value10, nil)
     }
 }
